@@ -1,13 +1,9 @@
+// src/App.tsx
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import Navigation from './src/navigation/Navigation'; // Importa a navegação
+import Navigation from './src/navigation/Navigation'; // Verifique se o caminho está correto!
 
 const App = () => {
-  return (
-    <NavigationContainer>
-      <Navigation />  {/* Chama a navegação dentro do app */}
-    </NavigationContainer>
-  );
+  return <Navigation />;
 };
 
 export default App;

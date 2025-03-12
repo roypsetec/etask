@@ -1,34 +1,42 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { auth } from '../firebase/firebaseConfig'; // Importa a configuração do Firebase
-import { signInWithEmailAndPassword } from 'firebase/auth'; // Método de login
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { auth } from '../firebase/firebaseConfig'; // Firebase auth
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const LoginScreen = ({ navigation }: any) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(''); // Estado para armazenar a mensagem de erro
+// Definir a tipagem para a navegação
+type RootStackParamList = {
+  Login: undefined;
+  Signup: undefined;
+  Home: undefined;
+};
+
+const LoginScreen = () => {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>(''); // Estado para mostrar erro
+  
+  // Tipar o useNavigation corretamente com NativeStackNavigationProp
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  useEffect(() => {
+    // Verifica o estado de autenticação do usuário
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigation.navigate('Home'); // Se o usuário estiver logado, navega para a tela Home
+      }
+    });
+
+    return unsubscribe; // Limpeza do listener quando a tela for desmontada
+  }, [navigation]);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Erro', 'Preencha todos os campos.');
-      return;
-    }
-
-    setLoading(true);
-    setErrorMessage(''); // Limpar a mensagem de erro anterior
-
     try {
-      // Tenta realizar o login com email e senha
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      navigation.navigate('Home'); // Navega para a tela principal após o login
+      await signInWithEmailAndPassword(auth, email, password);
+      setErrorMessage(''); // Limpa a mensagem de erro, caso o login seja bem-sucedido
     } catch (error: any) {
-      // Se ocorrer um erro, ele captura e exibe a mensagem
-      setErrorMessage(error.message); // Atualiza o estado de erro
-      Alert.alert('Erro', error.message); // Exibe um alerta de erro
-    } finally {
-      setLoading(false);
+      setErrorMessage(error.message); // Exibe a mensagem de erro
     }
   };
 
@@ -40,21 +48,30 @@ const LoginScreen = ({ navigation }: any) => {
         placeholder="E-mail"
         value={email}
         onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
       />
       <TextInput
         style={styles.input}
         placeholder="Senha"
+        secureTextEntry
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
       />
       
-      {/* Exibindo a mensagem de erro abaixo dos campos */}
-      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+      {errorMessage ? (
+        <Text style={styles.errorMessage}>{errorMessage}</Text> // Mensagem de erro visível se houver erro
+      ) : null}
 
-      <Button title={loading ? "Carregando..." : "Entrar"} onPress={handleLogin} />
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
+
+      {/* Botão de cadastro com estilo melhorado */}
+      <TouchableOpacity
+        style={styles.signupButton}
+        onPress={() => navigation.navigate('Signup')}
+      >
+        <Text style={styles.signupText}>Não tem uma conta? Cadastre-se</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -64,7 +81,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
   },
   title: {
     fontSize: 24,
@@ -72,15 +89,39 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 50,
-    marginBottom: 10,
-    borderColor: '#ddd',
+    height: 40,
+    borderColor: '#ccc',
     borderWidth: 1,
-    paddingLeft: 10,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 15,
   },
-  error: {
+  button: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginBottom: 10, // Espaçamento entre o botão de login e o botão de cadastro
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  errorMessage: {
     color: 'red',
     marginBottom: 10,
+  },
+  signupButton: {
+    marginTop: 15, // Espaçamento do botão de cadastro
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    borderColor: '#007BFF',
+    borderWidth: 1,
+  },
+  signupText: {
+    color: '#007BFF',
+    fontSize: 16,
   },
 });
 
