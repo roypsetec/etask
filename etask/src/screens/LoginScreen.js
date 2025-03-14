@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { loginWithEmail } from "../firebase/auth"; // Importação da função de login
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigation = useNavigation();
 
   const handleLogin = async () => {
     try {
-      // Chame sua função de login aqui
-      Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      navigation.navigate('Tasks'); // Navega para a tela de tarefas após login
+      const user = await loginWithEmail(email, password);
+      Alert.alert("Sucesso", "Login realizado com sucesso!");
+      console.log("Usuário logado:", user);
+      navigation.navigate("Tasks"); // Redireciona para a tela de tarefas
     } catch (error) {
-      Alert.alert('Erro', 'Credenciais inválidas.');
+      Alert.alert("Erro", error.message);
+      console.error("Erro no login:", error);
     }
   };
 
@@ -35,10 +38,7 @@ const LoginScreen = () => {
         secureTextEntry
       />
       <Button title="Entrar" onPress={handleLogin} />
-      <Button
-        title="Criar conta"
-        onPress={() => navigation.navigate('Signup')} // Navega para a tela de cadastro
-      />
+      <Button title="Criar conta" onPress={() => navigation.navigate("Signup")} />
     </View>
   );
 };
@@ -46,21 +46,20 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: '#F4F4F4',
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   input: {
-    width: '100%',
+    width: "100%",
     height: 40,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     marginBottom: 10,
     paddingHorizontal: 10,
