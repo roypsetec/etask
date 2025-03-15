@@ -1,4 +1,12 @@
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  OAuthProvider 
+} from "firebase/auth";
 import { app } from "./firebaseConfig"; // Importe o app do arquivo firebaseConfig
 
 // Inicialize a autenticação com o app exportado
@@ -32,3 +40,32 @@ export const logout = async () => {
     throw new Error(error.message); // Exceção em caso de erro
   }
 };
+
+// Provedor do Google
+const googleProvider = new GoogleAuthProvider();
+
+// Função para login com Google
+export const loginWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    return result.user; // Retorna o usuário autenticado
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+// Provedor da Microsoft
+const microsoftProvider = new OAuthProvider('microsoft.com');
+
+// Função para login com Microsoft
+export const loginWithMicrosoft = async () => {
+  try {
+    const result = await signInWithPopup(auth, microsoftProvider);
+    return result.user; // Retorna o usuário autenticado
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+// Exportando a instância do auth para uso em outros arquivos
+export { auth };

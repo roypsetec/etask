@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth"; // Importe a função getAuth do SDK
 
 const firebaseConfig = {
   apiKey: "AIzaSyB7Ig2Y41GJtiQz8adw4s2QFo_O8LVrwHQ",
@@ -10,4 +11,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export { app };
+const auth = getAuth(app); // Crie a instância do auth com o app configurado
+
+export { auth }; // Exportando a instância auth
