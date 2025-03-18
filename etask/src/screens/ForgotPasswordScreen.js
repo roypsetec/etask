@@ -1,68 +1,123 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, Alert, StyleSheet } from "react-native";
-import { sendPasswordResetEmail } from "firebase/auth"; // Importando a função do Firebase
-import { auth } from "../firebase/firebaseConfig"; // Certifique-se de que a configuração do Firebase está correta
-import { useNavigation } from "@react-navigation/native"; // Importando para navegação
+// C:\royps\etask\etask\src\screens\ForgotPasswordScreen.js
 
-export default function ForgotPasswordScreen() {
-  const [email, setEmail] = useState("");
+import React, { useState } from 'react';
+import { Alert } from 'react-native';
+import styled from 'styled-components/native';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../firebase/firebaseConfig';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+
+const ForgotPasswordScreen = () => {
+  const [email, setEmail] = useState('');
   const navigation = useNavigation();
 
   const handlePasswordReset = () => {
-    if (email === "") {
-      Alert.alert("Erro", "Por favor, insira seu e-mail.");
+    if (!email) {
+      Alert.alert('Erro', 'Por favor, insira seu e-mail.');
       return;
     }
-
     sendPasswordResetEmail(auth, email)
       .then(() => {
-        // Exibindo o alerta para o usuário
         Alert.alert(
-          "E-mail enviado!",
-          "Verifique sua caixa de entrada para redefinir sua senha.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                // Redirecionando o usuário para a tela de Login
-                navigation.navigate("Login");
-              },
-            },
-          ]
+          'E-mail enviado!',
+          'Verifique sua caixa de entrada para redefinir sua senha.',
+          [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
         );
       })
       .catch((error) => {
-        const errorMessage = error.message;
-        Alert.alert("Erro", errorMessage);
+        Alert.alert('Erro', error.message);
       });
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite seu e-mail"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-      />
-      <Button title="Enviar e-mail de recuperação" onPress={handlePasswordReset} />
-    </View>
+    <Container>
+      <Title>Recuperar Senha</Title>
+      <ImpactPhrase>Não deixe nada te parar. Recupere seu acesso e siga em frente!</ImpactPhrase>
+      <InputWrapper>
+        <Label>Email</Label>
+        <InputRow>
+          <Ionicons name="mail-outline" size={20} color="#fff" />
+          <StyledTextInput
+            placeholder="Digite seu e-mail"
+            placeholderTextColor="#aaa"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </InputRow>
+      </InputWrapper>
+      <Button onPress={handlePasswordReset}>
+        <ButtonText>Enviar E-mail de Recuperação</ButtonText>
+      </Button>
+    </Container>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  input: {
-    width: "100%",
-    padding: 10,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-  },
-});
+export default ForgotPasswordScreen;
+
+// Estilização com styled-components/native
+
+const Container = styled.View`
+  flex: 1;
+  background-color: #212121;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+`;
+
+const Title = styled.Text`
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 10px;
+`;
+
+const ImpactPhrase = styled.Text`
+  font-size: 16px;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+`;
+
+const InputWrapper = styled.View`
+  width: 100%;
+  margin-bottom: 15px;
+`;
+
+const Label = styled.Text`
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 5px;
+`;
+
+const InputRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  background-color: #333;
+  border-radius: 10px;
+  padding: 10px;
+`;
+
+const StyledTextInput = styled.TextInput`
+  flex: 1;
+  color: #fff;
+  margin-left: 10px;
+`;
+
+const Button = styled.TouchableOpacity`
+  width: 100%;
+  background-color: #151717;
+  padding: 15px;
+  border-radius: 10px;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const ButtonText = styled.Text`
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+`;
