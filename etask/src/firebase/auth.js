@@ -2,33 +2,29 @@ import {
   getAuth, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
-  signOut, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  OAuthProvider 
+  signOut 
 } from "firebase/auth";
-import { app } from "./firebaseConfig"; // Importe o app do arquivo firebaseConfig
+import { app } from "./firebaseConfig"; // Importando o app
 
-// Inicialize a autenticação com o app exportado
-const auth = getAuth(app); // Agora o auth está vinculado ao app
+const auth = getAuth(app); // Inicializando autenticação com Firebase App
 
 // Função para login com email e senha
 export const loginWithEmail = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user; // Retorna o usuário autenticado
+    return userCredential.user;
   } catch (error) {
-    throw new Error(error.message); // Exceção em caso de erro
+    throw new Error(error.message);
   }
 };
 
-// Função para cadastro de usuário com email e senha
+// Função para cadastro com email e senha
 export const signUpWithEmail = async (email, password) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    return userCredential.user; // Retorna o usuário cadastrado
+    return userCredential.user;
   } catch (error) {
-    throw new Error(error.message); // Exceção em caso de erro
+    throw new Error(error.message);
   }
 };
 
@@ -37,35 +33,9 @@ export const logout = async () => {
   try {
     await signOut(auth);
   } catch (error) {
-    throw new Error(error.message); // Exceção em caso de erro
-  }
-};
-
-// Provedor do Google
-const googleProvider = new GoogleAuthProvider();
-
-// Função para login com Google
-export const loginWithGoogle = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    return result.user; // Retorna o usuário autenticado
-  } catch (error) {
     throw new Error(error.message);
   }
 };
 
-// Provedor da Microsoft
-const microsoftProvider = new OAuthProvider('microsoft.com');
-
-// Função para login com Microsoft
-export const loginWithMicrosoft = async () => {
-  try {
-    const result = await signInWithPopup(auth, microsoftProvider);
-    return result.user; // Retorna o usuário autenticado
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-// Exportando a instância do auth para uso em outros arquivos
+// Exportando instância do auth
 export { auth };

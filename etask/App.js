@@ -1,5 +1,3 @@
-// C:\royps\etask\etask\App.js
-
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -10,6 +8,7 @@ import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import { auth } from './src/firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { StatusBar } from 'expo-status-bar'; // Importando o StatusBar
+import { Provider as PaperProvider } from 'react-native-paper'; // Importando o React Native Paper
 
 const Stack = createStackNavigator();
 
@@ -28,7 +27,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <PaperProvider>
       {/* Definindo a cor da StatusBar */}
       <StatusBar style="light" backgroundColor="#212121" />
 
@@ -47,6 +46,6 @@ export default function App() {
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Recuperar Senha' }} />
         </Stack.Navigator>
       </NavigationContainer>
-    </>
+    </PaperProvider>
   );
 }
