@@ -1,9 +1,11 @@
-// src/screens/LoginScreen.js
+//LoginScreen.js
+
 import React, { useState } from 'react';
 import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { loginWithEmail } from '../firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/firebaseConfig'; // Ajuste conforme necessário
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -16,8 +18,8 @@ const LoginScreen = () => {
       return;
     }
     try {
-      await loginWithEmail(email, password);
-      navigation.navigate('Tasks');
+      await signInWithEmailAndPassword(auth, email, password);
+      navigation.navigate('HomeTabs'); // Redireciona para a tela de tarefas após login
     } catch (error) {
       Alert.alert('Erro', error.message);
     }

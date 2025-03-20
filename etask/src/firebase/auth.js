@@ -1,3 +1,5 @@
+//auth.js
+
 import { 
   getAuth, 
   signInWithEmailAndPassword, 

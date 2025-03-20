@@ -1,4 +1,5 @@
-// src/screens/ForgotPasswordScreen.js
+//ForgotPasswordScreen.js
+
 import React, { useState } from 'react';
 import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

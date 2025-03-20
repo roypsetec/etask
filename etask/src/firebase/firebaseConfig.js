@@ -1,3 +1,5 @@
+//firebaseConfig.js
+
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth"; // Importe a função getAuth do SDK
 
