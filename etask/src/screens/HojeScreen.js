@@ -1,6 +1,6 @@
 // src/screens/HojeScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -152,7 +152,10 @@ const HojeScreen = () => {
 
       {/* Janela de criação de tarefa */}
       {showTaskInput && (
-        <View style={styles.taskInputContainer}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.taskInputContainer}
+        >
           <TextInput
             style={styles.input}
             placeholder="Título da tarefa"
@@ -189,10 +192,22 @@ const HojeScreen = () => {
               onChange={handleDateChange}
             />
           )}
+
+          {/* Botão para cancelar a criação da tarefa */}
+          <TouchableOpacity 
+            style={styles.cancelButton} 
+            onPress={() => {
+              setShowTaskInput(false);
+              Keyboard.dismiss(); // Fecha o teclado
+            }}
+          >
+            <Text style={styles.cancelButtonText}>Cancelar</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.button} onPress={handleAddTask}>
             <Text style={styles.buttonText}>Adicionar Tarefa</Text>
           </TouchableOpacity>
-        </View>
+        </KeyboardAvoidingView>
       )}
     </View>
   );
@@ -245,36 +260,70 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    left: 40,
+    marginBottom: 5,
+    paddingLeft: 40, // Movendo para a direita
   },
   taskDescription: {
     fontSize: 14,
     color: '#ccc',
-    marginTop: 5,
-    left: 40,
+    marginBottom: 5,
+    paddingLeft: 40, // Movendo para a direita
   },
   taskDeadline: {
     fontSize: 12,
     color: '#ccc',
-    marginTop: 5,
-    left: 40,
+    paddingLeft: 40, // Movendo para a direita
   },
   checkButton: {
     position: 'absolute',
     top: 15,
     left: 15, // Botão à esquerda
   },
-  completedTaskContainer: {
+  completionMessageContainer: {
+    position: 'absolute',
+    bottom: 80, // Acima do botão flutuante
+    left: 20,
+    right: 20,
     backgroundColor: '#2d79f3',
-    padding: 20,
+    padding: 15,
     borderRadius: 10,
-    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  completedMessage: {
-    fontSize: 18,
+  completionMessage: {
     color: '#fff',
-    marginBottom: 10,
+    fontSize: 16,
+  },
+  completionMessageAction: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  addButton: {
+    backgroundColor: '#2d79f3',
+    borderRadius: 10, // Mais quadrado
+    position: 'absolute',
+    bottom: 20, // Mais para baixo
+    right: 20,
+    padding: 10, // Menor
+  },
+  addTaskButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#333',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  addTaskIcon: {
+    marginRight: 10,
+  },
+  addTaskText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   taskInputContainer: {
     width: '90%',
@@ -309,39 +358,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
-  addButton: {
-    backgroundColor: '#2d79f3',
-    borderRadius: 10, // Mais quadrado
-    position: 'absolute',
-    bottom: 20, // Mais para baixo
-    right: 20,
-    padding: 10, // Menor
-  },
-  completionMessageContainer: {
-    position: 'absolute',
-    bottom: 80, // Acima do botão flutuante
-    left: 20,
-    right: 20,
-    backgroundColor: '#2d79f3',
-    padding: 15,
+  cancelButton: {
+    backgroundColor: '#f44336',
+    paddingVertical: 10,
+    marginBottom: 10,
     borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  addTaskButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#333',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 10,
-  },
-  addTaskIcon: {
-    marginRight: 10,
-  },
-  addTaskText: {
+  cancelButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
