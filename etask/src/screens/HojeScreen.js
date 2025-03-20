@@ -14,6 +14,7 @@ const HojeScreen = () => {
   const [taskAdded, setTaskAdded] = useState(false);
   const [completedTask, setCompletedTask] = useState(null);
   const [completionMessage, setCompletionMessage] = useState(null);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
 
   const handleAddTask = () => {
     if (taskTitle && taskDescription) {
@@ -74,6 +75,22 @@ const HojeScreen = () => {
       setCompletedTask(null); // Limpa a tarefa concluída
       setCompletionMessage(null); // Remove a mensagem
     }
+  };
+
+  const handleCancelTaskCreation = () => {
+    setShowCancelConfirmation(true); // Exibe a confirmação de cancelamento
+  };
+
+  const confirmCancelTaskCreation = () => {
+    setShowTaskInput(false); // Fecha a área de criação
+    setShowCancelConfirmation(false); // Fecha a confirmação
+    setTaskTitle(''); // Limpa o título
+    setTaskDescription(''); // Limpa a descrição
+    setTaskDeadline(new Date()); // Reseta a data
+  };
+
+  const dismissCancelConfirmation = () => {
+    setShowCancelConfirmation(false); // Fecha a confirmação
   };
 
   const renderAddTaskButton = () => {
@@ -156,6 +173,7 @@ const HojeScreen = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.taskInputContainer}
         >
+          {/* Área de título */}
           <TextInput
             style={styles.input}
             placeholder="Título da tarefa"
@@ -163,6 +181,8 @@ const HojeScreen = () => {
             value={taskTitle}
             onChangeText={setTaskTitle}
           />
+
+          {/* Área de descrição */}
           <TextInput
             style={styles.input}
             placeholder="Descrição da tarefa"
@@ -170,18 +190,21 @@ const HojeScreen = () => {
             value={taskDescription}
             onChangeText={setTaskDescription}
           />
+
+          {/* Área de data com ícone de calendário */}
           <View style={styles.dateInputContainer}>
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+              <Ionicons name="calendar" size={24} color="#ccc" style={styles.calendarIcon} />
+            </TouchableOpacity>
             <TextInput
-              style={styles.input}
+              style={styles.dateInput}
               placeholder="Prazo"
               placeholderTextColor="#ccc"
-              value={formatDate(taskDeadline)}
+              value={taskDeadline.toDateString() === new Date().toDateString() ? 'Hoje' : formatDate(taskDeadline)}
               editable={false}
             />
-            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-              <Ionicons name="calendar" size={24} color="#ccc" />
-            </TouchableOpacity>
           </View>
+
           {showDatePicker && (
             <DateTimePicker
               testID="dateTimePicker"
@@ -193,21 +216,44 @@ const HojeScreen = () => {
             />
           )}
 
-          {/* Botão para cancelar a criação da tarefa */}
-          <TouchableOpacity 
-            style={styles.cancelButton} 
-            onPress={() => {
-              setShowTaskInput(false);
-              Keyboard.dismiss(); // Fecha o teclado
-            }}
-          >
-            <Text style={styles.cancelButtonText}>Cancelar</Text>
-          </TouchableOpacity>
+          {/* Botões de envio e cancelamento */}
+          <View style={styles.taskInputButtons}>
+            <TouchableOpacity 
+              style={styles.cancelButton} 
+              onPress={handleCancelTaskCreation}
+            >
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button} onPress={handleAddTask}>
-            <Text style={styles.buttonText}>Adicionar Tarefa</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.sendButton} 
+              onPress={handleAddTask}
+            >
+              <Ionicons name="send" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </KeyboardAvoidingView>
+      )}
+
+      {/* Modal de confirmação de cancelamento */}
+      {showCancelConfirmation && (
+        <View style={styles.cancelConfirmationContainer}>
+          <Text style={styles.cancelConfirmationText}>Deseja realmente cancelar?</Text>
+          <View style={styles.cancelConfirmationButtons}>
+            <TouchableOpacity 
+              style={styles.confirmButton} 
+              onPress={confirmCancelTaskCreation}
+            >
+              <Text style={styles.confirmButtonText}>Sim</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.dismissButton} 
+              onPress={dismissCancelConfirmation}
+            >
+              <Text style={styles.dismissButtonText}>Não</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
     </View>
   );
@@ -326,13 +372,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   taskInputContainer: {
-    width: '90%',
+    width: '100%', // Cobre horizontalmente
     backgroundColor: '#333',
     borderRadius: 10,
     padding: 15,
-    alignSelf: 'center',
     position: 'absolute',
-    bottom: 100,
+    bottom: 0, // Colado ao teclado
   },
   input: {
     backgroundColor: '#444',
@@ -344,8 +389,30 @@ const styles = StyleSheet.create({
   dateInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: '#444',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8, // Reduzindo o espaço vertical
     marginBottom: 10,
+  },
+  calendarIcon: {
+    marginRight: 10,
+  },
+  dateInput: {
+    color: '#fff',
+    flex: 1,
+  },
+  taskInputButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  sendButton: {
+    backgroundColor: '#2d79f3',
+    padding: 10,
+    borderRadius: 10,
+    alignSelf: 'flex-end', // Alinha no canto direito
+    marginTop: 10,
   },
   button: {
     backgroundColor: '#2d79f3',
@@ -366,6 +433,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  cancelConfirmationContainer: {
+    position: 'absolute',
+    top: '40%',
+    left: '10%',
+    right: '10%',
+    backgroundColor: '#444',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  cancelConfirmationText: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  cancelConfirmationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  confirmButton: {
+    backgroundColor: '#f44336',
+    padding: 10,
+    borderRadius: 10,
+    flex: 1,
+    marginRight: 5,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  dismissButton: {
+    backgroundColor: '#2d79f3',
+    padding: 10,
+    borderRadius: 10,
+    flex: 1,
+    marginLeft: 5,
+    alignItems: 'center',
+  },
+  dismissButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
