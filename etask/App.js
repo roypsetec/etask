@@ -8,7 +8,7 @@ import HomeTabs from './src/navigation/TabNavigator';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import { auth } from './src/firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'react-native';
 
 const Stack = createStackNavigator();
 
@@ -28,7 +28,7 @@ export default function App() {
 
   return (
     <>
-      <StatusBar style="light" backgroundColor="#212121" />
+      <StatusBar backgroundColor="#212121" barStyle="light-content" />
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName={user ? 'HomeTabs' : 'Login'}
