@@ -1,27 +1,29 @@
-//EmBreveScreen.js
-
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, StatusBar } from 'react-native';
-import { Calendar } from 'react-native-calendars'; // Importa o componente de calendário
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { Calendar } from 'react-native-calendars';
+import { getTasksByDate } from '../firebase/firestoreService';
 
 const EmBreveScreen = () => {
-  const [selectedDate, setSelectedDate] = useState(null); // Data selecionada no calendário
-  const [tasks, setTasks] = useState([
-    // Exemplo de tarefas
-    { id: 1, title: 'Tarefa 1', description: 'Descrição da tarefa 1', deadline: '2025-03-25' },
-    { id: 2, title: 'Tarefa 2', description: 'Descrição da tarefa 2', deadline: '2025-03-26' },
-  ]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [tasks, setTasks] = useState([]);
 
-  // Filtra as tarefas para a data selecionada
-  const filteredTasks = tasks.filter((task) => task.deadline === selectedDate);
+  useEffect(() => {
+    if (selectedDate) {
+      console.log("Data selecionada:", selectedDate);  // Log da data selecionada
+      getTasksByDate(selectedDate).then(tasks => {
+        console.log("Tarefas retornadas:", tasks);  // Log das tarefas retornadas
+        setTasks(tasks);
+      });
+    }
+  }, [selectedDate]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.screenTitle}>Em breve</Text>
       <Calendar
-        onDayPress={(day) => setSelectedDate(day.dateString)} // Atualiza a data selecionada
+        onDayPress={(day) => setSelectedDate(day.dateString)} // `day.dateString` já é no formato 'YYYY-MM-DD'
         markedDates={{
-          [selectedDate]: { selected: true, selectedColor: '#2d79f3' }, // Marca a data selecionada
+          [selectedDate]: { selected: true, selectedColor: '#2d79f3' },
         }}
         theme={{
           todayTextColor: '#2d79f3',
@@ -30,8 +32,8 @@ const EmBreveScreen = () => {
         }}
       />
       <FlatList
-        data={filteredTasks}
-        keyExtractor={(item) => item.id.toString()}
+        data={tasks}
+        keyExtractor={(item) => item.id}
         ListEmptyComponent={<Text style={styles.noTasksText}>Nenhuma tarefa para esta data</Text>}
         renderItem={({ item }) => (
           <View style={styles.taskItem}>
@@ -49,19 +51,13 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: '#212121', 
     paddingHorizontal: 20, 
-    paddingTop: 20, // Ajusta o topo com base na altura da StatusBar
+    paddingTop: 20, 
   },
   screenTitle: { 
     fontSize: 24, 
     fontWeight: 'bold', 
     color: '#fff', 
     marginBottom: 20, 
-    marginLeft: 0, // Remove deslocamento desnecessário
-  },
-  selectedDateText: { 
-    fontSize: 16, 
-    color: '#fff', 
-    marginVertical: 10 
   },
   noTasksText: { 
     textAlign: 'center', 
