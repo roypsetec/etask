@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-// import { signInWithEmailAndPassword } from 'firebase/auth';
-// import { auth } from '../firebase/firebaseConfig'; // Ajuste conforme necessário
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/firebaseConfig'; // Ajuste conforme necessário
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -18,16 +18,14 @@ const LoginScreen = () => {
     }
     
     // Desativando autenticação temporariamente
-    navigation.navigate('HomeTabs'); // Redireciona para a tela de tarefas após login
     
-    /*
+    
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigation.navigate('HomeTabs'); // Redireciona para a tela de tarefas após login
     } catch (error) {
       Alert.alert('Erro', error.message);
     }
-    */
   };
 
   const handleForgotPassword = () => navigation.navigate('ForgotPassword');

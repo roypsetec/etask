@@ -1,4 +1,4 @@
-// firebaseService.js
+// firestoreService.js
 import { collection, addDoc, getDocs, query, where, doc, deleteDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "./firebaseConfig"; // Importa a instância do Firestore
 
@@ -7,7 +7,11 @@ const tarefasCollection = collection(db, "tarefas");
 // Adicionar uma nova tarefa ao Firestore
 export const addTask = async (task) => {
   try {
-    await addDoc(tarefasCollection, task);
+    await addDoc(tarefasCollection, {
+      ...task,
+      createdAt: Timestamp.now(), // Sempre salva data de criação
+      completed: false // Sempre inicia como não concluída
+    });
     console.log("Tarefa adicionada com sucesso!");
   } catch (error) {
     console.error("Erro ao adicionar tarefa:", error);
@@ -43,9 +47,10 @@ export const getTasksByDate = async (dateString) => {
         id: doc.id,
         title: data.title,
         description: data.description,
-        deadline: data.deadline.toDate().toISOString().split('T')[0], // Formatação para data
-        status: data.status,
-        priority: data.priority
+        deadline: data.deadline.toDate().toISOString().split('T')[0], // Formatação para data (YYYY-MM-DD)
+        completed: data.completed,
+        userId: data.userId,
+        createdAt: data.createdAt.toDate().toISOString()
       };
     });
 
@@ -53,5 +58,27 @@ export const getTasksByDate = async (dateString) => {
   } catch (error) {
     console.error("Erro ao buscar tarefas por data:", error);
     return [];
+  }
+};
+
+// Atualizar status de conclusão da tarefa
+export const toggleTaskCompletion = async (taskId, completed) => {
+  try {
+    const taskDoc = doc(db, "tarefas", taskId);
+    await updateDoc(taskDoc, { completed });
+    console.log(`Tarefa ${taskId} atualizada para completed=${completed}`);
+  } catch (error) {
+    console.error("Erro ao atualizar tarefa:", error);
+  }
+};
+
+// Excluir tarefa
+export const deleteTask = async (taskId) => {
+  try {
+    const taskDoc = doc(db, "tarefas", taskId);
+    await deleteDoc(taskDoc);
+    console.log(`Tarefa ${taskId} deletada com sucesso`);
+  } catch (error) {
+    console.error("Erro ao deletar tarefa:", error);
   }
 };
