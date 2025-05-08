@@ -18,6 +18,9 @@ const HojeScreen = () => {
   const [completedTask, setCompletedTask] = useState(null);
   const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false);
 
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -55,7 +58,7 @@ const HojeScreen = () => {
       };
       try {
         await addDoc(collection(db, 'tasks'), newTask);
-        fetchTasks(); // Atualiza a lista após adicionar
+        fetchTasks();
         setTaskTitle('');
         setTaskDescription('');
         setTaskDeadline(new Date());
@@ -82,9 +85,23 @@ const HojeScreen = () => {
     }
   };
 
+  const deleteTask = async (taskId) => {
+    try {
+      await deleteDoc(doc(db, 'tasks', taskId));
+      fetchTasks();
+      setShowOptionsModal(false);
+    } catch (error) {
+      console.error('Erro ao deletar tarefa:', error);
+    }
+  };
+
+  const openTaskOptions = (task) => {
+    setSelectedTask(task);
+    setShowOptionsModal(true);
+  };
+
   const handleDiscardTask = () => {
     if (completedTask) {
-      // Se quiser permitir restaurar, pode re-adicionar aqui
       setCompletedTask(null);
     }
   };
@@ -146,6 +163,7 @@ const HojeScreen = () => {
                     color="#fff"
                   />
                 </TouchableOpacity>
+
                 <View style={styles.taskContent}>
                   <Text style={[styles.taskTitle, item.completed && styles.completedText]}>
                     {item.title}
@@ -153,6 +171,10 @@ const HojeScreen = () => {
                   <Text style={styles.taskDescription}>{item.description}</Text>
                   <Text style={styles.taskDeadline}>{formatDate(item.deadline)}</Text>
                 </View>
+
+                <TouchableOpacity onPress={() => openTaskOptions(item)}>
+                  <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+                </TouchableOpacity>
               </View>
             )}
           />
@@ -223,6 +245,46 @@ const HojeScreen = () => {
               </TouchableWithoutFeedback>
             </Modal>
           )}
+
+          <Modal
+            visible={showOptionsModal}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setShowOptionsModal(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setShowOptionsModal(false)}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.taskInputContainer}>
+                  <Text style={[styles.taskTitle, { marginBottom: 15 }]}>Opções da Tarefa</Text>
+
+                  <TouchableOpacity
+                    style={styles.sendButton}
+                    onPress={() => {
+                      Alert.alert('Editar tarefa ainda não implementado');
+                      setShowOptionsModal(false);
+                    }}
+                  >
+                    <Text style={{ color: '#fff', fontSize: 16 }}>Editar tarefa</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.cancelButton, { marginTop: 10 }]}
+                    onPress={() => deleteTask(selectedTask.id)}
+                  >
+                    <Text style={{ color: '#fff', fontSize: 16 }}>Excluir tarefa</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.cancelButton, { marginTop: 10 }]}
+                    onPress={() => setShowOptionsModal(false)}
+                  >
+                    <Text style={{ color: '#fff', fontSize: 16 }}>Cancelar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+
         </View>
       </TouchableWithoutFeedback>
     </View>
@@ -234,7 +296,7 @@ const styles = StyleSheet.create({
   screenTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 20, marginLeft: -20 },
   noTasksText: { textAlign: 'center', color: '#ccc', marginTop: 20 },
   taskItem: { backgroundColor: '#333', flexDirection: 'row', alignItems: 'center', padding: 15, borderRadius: 10, marginBottom: 10 },
-  taskContent: { marginLeft: 10 },
+  taskContent: { marginLeft: 10, flex: 1 },
   taskTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
   taskDescription: { fontSize: 14, color: '#ccc' },
   taskDeadline: { fontSize: 12, color: '#aaa' },
@@ -245,8 +307,8 @@ const styles = StyleSheet.create({
   input: { backgroundColor: '#444', color: '#fff', borderRadius: 8, padding: 10, marginBottom: 10 },
   calendarButton: { backgroundColor: '#555', padding: 10, borderRadius: 10, alignItems: 'center', marginBottom: 10 },
   taskInputButtons: { flexDirection: 'row', justifyContent: 'space-between' },
-  sendButton: { backgroundColor: '#2d79f3', padding: 10, borderRadius: 10 },
-  cancelButton: { backgroundColor: '#f44336', padding: 10, borderRadius: 10 },
+  sendButton: { backgroundColor: '#2d79f3', padding: 10, borderRadius: 10, alignItems: 'center' },
+  cancelButton: { backgroundColor: '#f44336', padding: 10, borderRadius: 10, alignItems: 'center' },
   cancelButtonText: { color: '#fff', fontSize: 16 },
   completedMessage: { backgroundColor: '#444', padding: 15, position: 'absolute', bottom: 20, left: 20, right: 20, borderRadius: 10, flexDirection: 'row', justifyContent: 'space-between' },
   undoButton: { backgroundColor: '#f44336', padding: 5, borderRadius: 5 },

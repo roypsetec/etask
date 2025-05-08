@@ -14,6 +14,7 @@
     "@react-navigation/bottom-tabs": "^7.3.1",
     "@react-navigation/native": "^7.0.17",
     "@react-navigation/stack": "^7.1.2",
+    "date-fns": "^4.1.0",
     "expo": "~52.0.38",
     "expo-linear-gradient": "~14.0.2",
     "expo-status-bar": "~2.0.1",
