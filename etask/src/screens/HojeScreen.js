@@ -5,8 +5,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig'; // ajuste o caminho se necessário
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
+import { getAuth } from 'firebase/auth';
+import { updateDoc } from 'firebase/firestore';
+import { ToastAndroid } from 'react-native';
+
 
 const HojeScreen = () => {
   const [showTaskInput, setShowTaskInput] = useState(false);
@@ -16,28 +20,35 @@ const HojeScreen = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [completedTask, setCompletedTask] = useState(null);
-  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false);
-
   const [selectedTask, setSelectedTask] = useState(null);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);  // Estado para o modal de edição
 
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+  const getTodayRange = () => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end };
   };
 
   const fetchTasks = async () => {
     try {
-      const today = getTodayDate();
+      const { start, end } = getTodayRange();
+
       const q = query(
-        collection(db, 'tasks'),
-        where('deadline', '==', today)
+        collection(db, 'tarefas'),
+        where('deadline', '>=', Timestamp.fromDate(start)),
+        where('deadline', '<=', Timestamp.fromDate(end))
       );
       const querySnapshot = await getDocs(q);
       const tasksFromFirestore = querySnapshot.docs.map(docSnap => ({
         id: docSnap.id,
         ...docSnap.data()
       }));
+      console.log("Tarefas recuperadas:", tasksFromFirestore);
       setTasks(tasksFromFirestore);
     } catch (error) {
       console.error("Erro ao buscar tarefas:", error);
@@ -50,14 +61,18 @@ const HojeScreen = () => {
 
   const handleAddTask = async () => {
     if (taskTitle.trim() && taskDescription.trim()) {
+      const auth = getAuth();
+      const userId = auth.currentUser ? auth.currentUser.uid : 'desconhecido';
       const newTask = {
         title: taskTitle,
         description: taskDescription,
-        deadline: taskDeadline.toISOString().split('T')[0],
+        deadline: Timestamp.fromDate(taskDeadline),
         completed: false,
+        userId: userId,
+        createdAt: Timestamp.now(),
       };
       try {
-        await addDoc(collection(db, 'tasks'), newTask);
+        await addDoc(collection(db, 'tarefas'), newTask);
         fetchTasks();
         setTaskTitle('');
         setTaskDescription('');
@@ -75,7 +90,7 @@ const HojeScreen = () => {
     const taskToComplete = tasks.find(task => task.id === taskId);
     if (taskToComplete) {
       try {
-        await deleteDoc(doc(db, 'tasks', taskId));
+        await deleteDoc(doc(db, 'tarefas', taskId));
         fetchTasks();
         setCompletedTask(taskToComplete);
         setTimeout(() => setCompletedTask(null), 10000);
@@ -87,7 +102,7 @@ const HojeScreen = () => {
 
   const deleteTask = async (taskId) => {
     try {
-      await deleteDoc(doc(db, 'tasks', taskId));
+      await deleteDoc(doc(db, 'tarefas', taskId));
       fetchTasks();
       setShowOptionsModal(false);
     } catch (error) {
@@ -100,9 +115,25 @@ const HojeScreen = () => {
     setShowOptionsModal(true);
   };
 
-  const handleDiscardTask = () => {
+  const handleDiscardTask = async () => {
     if (completedTask) {
-      setCompletedTask(null);
+      try {
+        // Recria a tarefa no Firestore
+        await addDoc(collection(db, 'tarefas'), {
+          title: completedTask.title,
+          description: completedTask.description,
+          deadline: completedTask.deadline,
+          completed: false,
+          userId: completedTask.userId,
+          createdAt: completedTask.createdAt,
+        });
+  
+        fetchTasks(); // Atualiza a lista de tarefas
+        setCompletedTask(null); // Some com a mensagem de conclusão
+        ToastAndroid.show('Tarefa restaurada com sucesso!', ToastAndroid.SHORT);
+      } catch (error) {
+        console.error('Erro ao restaurar tarefa:', error);
+      }
     }
   };
 
@@ -113,11 +144,10 @@ const HojeScreen = () => {
     setShowDatePicker(false);
   };
 
-  const formatDate = (date) => {
-    if (!date || isNaN(new Date(date))) {
-      return 'Data inválida';
-    }
-    return new Date(date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
+  const formatDate = (timestamp) => {
+    if (!timestamp || !timestamp.toDate) return 'Data inválida';
+    const date = timestamp.toDate();
+    return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
   };
 
   const showDiscardConfirmationAlert = () => {
@@ -141,6 +171,26 @@ const HojeScreen = () => {
   const handleOutsidePress = () => {
     if (showTaskInput) {
       showDiscardConfirmationAlert();
+    }
+  };
+
+  const handleEditTask = async () => {
+    if (selectedTask) {
+      try {
+        const taskRef = doc(db, 'tarefas', selectedTask.id);
+        await updateDoc(taskRef, {
+          title: selectedTask.title,
+          description: selectedTask.description,
+          deadline: selectedTask.deadline,
+        });
+        fetchTasks();
+        setShowEditModal(false); // Fecha o modal de edição
+        setShowOptionsModal(false); // Fecha o modal de opções (caso ainda esteja aberto)
+        setSelectedTask(null); // Limpa a tarefa selecionada
+        ToastAndroid.show('Tarefa atualizada com sucesso!', ToastAndroid.SHORT);
+      } catch (error) {
+        console.error("Erro ao editar tarefa:", error);
+      }
     }
   };
 
@@ -246,7 +296,7 @@ const HojeScreen = () => {
             </Modal>
           )}
 
-          <Modal
+<Modal
             visible={showOptionsModal}
             transparent
             animationType="slide"
@@ -259,10 +309,7 @@ const HojeScreen = () => {
 
                   <TouchableOpacity
                     style={styles.sendButton}
-                    onPress={() => {
-                      Alert.alert('Editar tarefa ainda não implementado');
-                      setShowOptionsModal(false);
-                    }}
+                    onPress={() => setShowEditModal(true)} // Abrir modal de edição
                   >
                     <Text style={{ color: '#fff', fontSize: 16 }}>Editar tarefa</Text>
                   </TouchableOpacity>
@@ -280,6 +327,71 @@ const HojeScreen = () => {
                   >
                     <Text style={{ color: '#fff', fontSize: 16 }}>Cancelar</Text>
                   </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+
+          {/* Modal de Edição */}
+          <Modal
+            visible={showEditModal}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setShowEditModal(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setShowEditModal(false)}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.taskInputContainer}>
+                  <Text style={[styles.taskTitle, { marginBottom: 15 }]}>Editar Tarefa</Text>
+
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Título da tarefa"
+                    placeholderTextColor="#ccc"
+                    value={selectedTask?.title}
+                    onChangeText={(text) => setSelectedTask({ ...selectedTask, title: text })}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Descrição da tarefa"
+                    placeholderTextColor="#ccc"
+                    value={selectedTask?.description}
+                    onChangeText={(text) => setSelectedTask({ ...selectedTask, description: text })}
+                  />
+
+                  <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.calendarButton}>
+                    <Ionicons name="calendar-outline" size={24} color="#fff" />
+                  </TouchableOpacity>
+
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={selectedTask?.deadline.toDate() || new Date()}
+                      mode="date"
+                      is24Hour={true}
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        if (selectedDate) {
+                          setSelectedTask({ ...selectedTask, deadline: Timestamp.fromDate(selectedDate) });
+                        }
+                        setShowDatePicker(false);
+                      }}
+                    />
+                  )}
+
+                  <View style={styles.taskInputButtons}>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => setShowEditModal(false)}
+                    >
+                      <Text style={styles.cancelButtonText}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.sendButton}
+                      onPress={handleEditTask}
+                    >
+                      <Ionicons name="checkmark" size={24} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -310,7 +422,7 @@ const styles = StyleSheet.create({
   sendButton: { backgroundColor: '#2d79f3', padding: 10, borderRadius: 10, alignItems: 'center' },
   cancelButton: { backgroundColor: '#f44336', padding: 10, borderRadius: 10, alignItems: 'center' },
   cancelButtonText: { color: '#fff', fontSize: 16 },
-  completedMessage: { backgroundColor: '#444', padding: 15, position: 'absolute', bottom: 20, left: 20, right: 20, borderRadius: 10, flexDirection: 'row', justifyContent: 'space-between' },
+  completedMessage: { backgroundColor: '#444', padding: 15, position: 'absolute', bottom: 80, left: 20, right: 20, borderRadius: 10, flexDirection: 'row', justifyContent: 'space-between',},
   undoButton: { backgroundColor: '#f44336', padding: 5, borderRadius: 5 },
   undoButtonText: { color: '#fff', fontSize: 16 },
   completedMessageText: { color: '#fff', fontSize: 16 },
