@@ -2,16 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { getTasksByDate } from '../firebase/firestoreService';
+import { getAuth } from 'firebase/auth';
+
 
 const EmBreveScreen = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    if (selectedDate) {
-      console.log("Data selecionada:", selectedDate);  // Log da data selecionada
-      getTasksByDate(selectedDate).then(tasks => {
-        console.log("Tarefas retornadas:", tasks);  // Log das tarefas retornadas
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (selectedDate && currentUser) {
+      console.log("Data selecionada:", selectedDate);
+      getTasksByDate(selectedDate, currentUser.uid).then(tasks => {
+        console.log("Tarefas retornadas:", tasks);
         setTasks(tasks);
       });
     }

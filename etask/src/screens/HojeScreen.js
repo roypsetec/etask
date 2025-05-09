@@ -34,12 +34,18 @@ const HojeScreen = () => {
     return { start, end };
   };
 
+  const auth = getAuth();
+  const user = auth.currentUser;
+
   const fetchTasks = async () => {
+    if (!user) return; // Garante que só busca se o usuário estiver logado
+
     try {
       const { start, end } = getTodayRange();
 
       const q = query(
         collection(db, 'tarefas'),
+        where('userId', '==', user.uid), // <-- Filtro pelo usuário
         where('deadline', '>=', Timestamp.fromDate(start)),
         where('deadline', '<=', Timestamp.fromDate(end))
       );
@@ -127,7 +133,7 @@ const HojeScreen = () => {
           userId: completedTask.userId,
           createdAt: completedTask.createdAt,
         });
-  
+
         fetchTasks(); // Atualiza a lista de tarefas
         setCompletedTask(null); // Some com a mensagem de conclusão
         ToastAndroid.show('Tarefa restaurada com sucesso!', ToastAndroid.SHORT);
@@ -296,7 +302,7 @@ const HojeScreen = () => {
             </Modal>
           )}
 
-<Modal
+          <Modal
             visible={showOptionsModal}
             transparent
             animationType="slide"
@@ -422,7 +428,7 @@ const styles = StyleSheet.create({
   sendButton: { backgroundColor: '#2d79f3', padding: 10, borderRadius: 10, alignItems: 'center' },
   cancelButton: { backgroundColor: '#f44336', padding: 10, borderRadius: 10, alignItems: 'center' },
   cancelButtonText: { color: '#fff', fontSize: 16 },
-  completedMessage: { backgroundColor: '#444', padding: 15, position: 'absolute', bottom: 80, left: 20, right: 20, borderRadius: 10, flexDirection: 'row', justifyContent: 'space-between',},
+  completedMessage: { backgroundColor: '#444', padding: 15, position: 'absolute', bottom: 80, left: 20, right: 20, borderRadius: 10, flexDirection: 'row', justifyContent: 'space-between', },
   undoButton: { backgroundColor: '#f44336', padding: 5, borderRadius: 5 },
   undoButtonText: { color: '#fff', fontSize: 16 },
   completedMessageText: { color: '#fff', fontSize: 16 },

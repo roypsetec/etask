@@ -19,9 +19,9 @@ export const addTask = async (task) => {
 };
 
 // Obter tarefas filtradas por data
-export const getTasksByDate = async (dateString) => {
+export const getTasksByDate = async (dateString, userId) => {
   try {
-    console.log("Buscando tarefas para a data:", dateString);  // Log da data que está sendo passada
+    console.log("Buscando tarefas para a data:", dateString, "do usuário:", userId);  // Log da data que está sendo passada
 
     const startOfDay = new Date(dateString);
     startOfDay.setHours(0, 0, 0, 0);
@@ -29,12 +29,10 @@ export const getTasksByDate = async (dateString) => {
     const endOfDay = new Date(dateString);
     endOfDay.setHours(23, 59, 59, 999);
 
-    console.log("Início do dia:", startOfDay);
-    console.log("Fim do dia:", endOfDay);
-
     const snapshot = await getDocs(
       query(
         tarefasCollection,
+        where('userId', '==', userId), // Filtro de usuário
         where('deadline', '>=', Timestamp.fromDate(startOfDay)),
         where('deadline', '<=', Timestamp.fromDate(endOfDay))
       )
@@ -42,7 +40,6 @@ export const getTasksByDate = async (dateString) => {
 
     const tasks = snapshot.docs.map(doc => {
       const data = doc.data();
-      console.log("Tarefa encontrada:", data); // Log da tarefa encontrada
       return {
         id: doc.id,
         title: data.title,
