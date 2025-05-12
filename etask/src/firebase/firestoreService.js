@@ -20,42 +20,28 @@ export const addTask = async (task) => {
 
 // Obter tarefas filtradas por data
 export const getTasksByDate = async (dateString, userId) => {
-  try {
-    console.log("Buscando tarefas para a data:", dateString, "do usuário:", userId);  // Log da data que está sendo passada
+  // dateString = 'YYYY-MM-DD'
+  const [year, month, day] = dateString.split('-').map(Number);
 
-    const startOfDay = new Date(dateString);
-    startOfDay.setHours(0, 0, 0, 0);
+  // Cria data inicial (00:00) e data final (00:00 do dia seguinte)
+  const startDate = new Date(year, month - 1, day, 0, 0, 0);
+  const endDate = new Date(year, month - 1, day + 1, 0, 0, 0);
 
-    const endOfDay = new Date(dateString);
-    endOfDay.setHours(23, 59, 59, 999);
+  const tasksRef = collection(db, 'tarefas');
+  const q = query(
+    tasksRef,
+    where('userId', '==', userId),
+    where('deadline', '>=', Timestamp.fromDate(startDate)),
+    where('deadline', '<', Timestamp.fromDate(endDate))
+  );
 
-    const snapshot = await getDocs(
-      query(
-        tarefasCollection,
-        where('userId', '==', userId), // Filtro de usuário
-        where('deadline', '>=', Timestamp.fromDate(startOfDay)),
-        where('deadline', '<=', Timestamp.fromDate(endOfDay))
-      )
-    );
+  const snapshot = await getDocs(q);
+  const tasks = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 
-    const tasks = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        title: data.title,
-        description: data.description,
-        deadline: data.deadline.toDate().toISOString().split('T')[0], // Formatação para data (YYYY-MM-DD)
-        completed: data.completed,
-        userId: data.userId,
-        createdAt: data.createdAt.toDate().toISOString()
-      };
-    });
-
-    return tasks;
-  } catch (error) {
-    console.error("Erro ao buscar tarefas por data:", error);
-    return [];
-  }
+  return tasks;
 };
 
 // Atualizar status de conclusão da tarefa

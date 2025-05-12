@@ -200,6 +200,8 @@ const HojeScreen = () => {
     }
   };
 
+  
+
   return (
     <View style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
