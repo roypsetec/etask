@@ -168,16 +168,36 @@ const EmBreveScreen = () => {
   };
 
   LocaleConfig.locales['pt-br'] = {
-  monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
-  monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-  dayNames: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
-  dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-  today: 'Hoje'
-};
+    monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+    monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+    dayNames: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
+    dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+    today: 'Hoje'
+  };
 
-LocaleConfig.defaultLocale = 'pt-br';
+  LocaleConfig.defaultLocale = 'pt-br';
 
-  
+  const handleDiscardTask = async () => {
+    if (completedTask) {
+        try {
+        // Recria a tarefa no Firestore
+        await addDoc(collection(db, 'tarefas'), {
+          title: completedTask.title,
+          deadline: completedTask.deadline,
+          completed: false,
+          userId: completedTask.userId,
+          createdAt: completedTask.createdAt,
+          description: completedTask.description,
+        });
+
+        fetchTasks(); // Atualiza a lista de tarefas
+        setCompletedTask(null); // Some com a mensagem de conclusão
+        ToastAndroid.show('Tarefa restaurada com sucesso!', ToastAndroid.SHORT);
+      } catch (error) {
+        console.error('Erro ao restaurar tarefa:', error);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
