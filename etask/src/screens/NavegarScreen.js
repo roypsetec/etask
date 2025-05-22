@@ -6,7 +6,7 @@ import { View, Text, StyleSheet } from 'react-native';
 const NavegarScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Explorar Tarefas</Text>
+      <Text style={styles.text}>Navegar</Text>
     </View>
   );
 };

@@ -1,16 +1,15 @@
 // firestoreService.js
 import { collection, addDoc, getDocs, query, where, doc, deleteDoc, updateDoc, Timestamp } from "firebase/firestore";
-import { db } from "./firebaseConfig"; // Importa a instância do Firestore
+import { db } from "./firebaseConfig";
 
 const tarefasCollection = collection(db, "tarefas");
 
-// Adicionar uma nova tarefa ao Firestore
 export const addTask = async (task) => {
   try {
     await addDoc(tarefasCollection, {
       ...task,
-      createdAt: Timestamp.now(), // Sempre salva data de criação
-      completed: false // Sempre inicia como não concluída
+      createdAt: Timestamp.now(),
+      completed: false
     });
     console.log("Tarefa adicionada com sucesso!");
   } catch (error) {
@@ -18,12 +17,10 @@ export const addTask = async (task) => {
   }
 };
 
-// Obter tarefas filtradas por data
 export const getTasksByDate = async (dateString, userId) => {
-  // dateString = 'YYYY-MM-DD'
+
   const [year, month, day] = dateString.split('-').map(Number);
 
-  // Cria data inicial (00:00) e data final (00:00 do dia seguinte)
   const startDate = new Date(year, month - 1, day, 0, 0, 0);
   const endDate = new Date(year, month - 1, day + 1, 0, 0, 0);
 
@@ -44,7 +41,6 @@ export const getTasksByDate = async (dateString, userId) => {
   return tasks;
 };
 
-// Atualizar status de conclusão da tarefa
 export const toggleTaskCompletion = async (taskId, completed) => {
   try {
     const taskDoc = doc(db, "tarefas", taskId);
@@ -55,7 +51,6 @@ export const toggleTaskCompletion = async (taskId, completed) => {
   }
 };
 
-// Excluir tarefa
 export const deleteTask = async (taskId) => {
   try {
     const taskDoc = doc(db, "tarefas", taskId);

@@ -22,7 +22,7 @@ const HojeScreen = () => {
   const [completedTask, setCompletedTask] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);  // Estado para o modal de edição
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const getTodayRange = () => {
     const start = new Date();
@@ -38,14 +38,14 @@ const HojeScreen = () => {
   const user = auth.currentUser;
 
   const fetchTasks = async () => {
-    if (!user) return; // Garante que só busca se o usuário estiver logado
+    if (!user) return;
 
     try {
       const { start, end } = getTodayRange();
 
       const q = query(
         collection(db, 'tarefas'),
-        where('userId', '==', user.uid), // <-- Filtro pelo usuário
+        where('userId', '==', user.uid),
         where('deadline', '>=', Timestamp.fromDate(start)),
         where('deadline', '<=', Timestamp.fromDate(end))
       );
@@ -124,7 +124,7 @@ const HojeScreen = () => {
   const handleDiscardTask = async () => {
     if (completedTask) {
       try {
-        // Recria a tarefa no Firestore
+        
         await addDoc(collection(db, 'tarefas'), {
           title: completedTask.title,
           description: completedTask.description,
@@ -134,8 +134,8 @@ const HojeScreen = () => {
           createdAt: completedTask.createdAt,
         });
 
-        fetchTasks(); // Atualiza a lista de tarefas
-        setCompletedTask(null); // Some com a mensagem de conclusão
+        fetchTasks();
+        setCompletedTask(null);
         ToastAndroid.show('Tarefa restaurada com sucesso!', ToastAndroid.SHORT);
       } catch (error) {
         console.error('Erro ao restaurar tarefa:', error);
@@ -190,9 +190,9 @@ const HojeScreen = () => {
           deadline: selectedTask.deadline,
         });
         fetchTasks();
-        setShowEditModal(false); // Fecha o modal de edição
-        setShowOptionsModal(false); // Fecha o modal de opções (caso ainda esteja aberto)
-        setSelectedTask(null); // Limpa a tarefa selecionada
+        setShowEditModal(false);
+        setShowOptionsModal(false);
+        setSelectedTask(null);
         ToastAndroid.show('Tarefa atualizada com sucesso!', ToastAndroid.SHORT);
       } catch (error) {
         console.error("Erro ao editar tarefa:", error);
@@ -317,7 +317,7 @@ const HojeScreen = () => {
 
                   <TouchableOpacity
                     style={styles.sendButton}
-                    onPress={() => setShowEditModal(true)} // Abrir modal de edição
+                    onPress={() => setShowEditModal(true)}
                   >
                     <Text style={{ color: '#fff', fontSize: 16 }}>Editar tarefa</Text>
                   </TouchableOpacity>
@@ -340,7 +340,6 @@ const HojeScreen = () => {
             </TouchableWithoutFeedback>
           </Modal>
 
-          {/* Modal de Edição */}
           <Modal
             visible={showEditModal}
             transparent
@@ -421,7 +420,7 @@ const styles = StyleSheet.create({
   taskDescription: { fontSize: 14, color: '#ccc' },
   taskDeadline: { fontSize: 12, color: '#aaa' },
   completedText: { textDecorationLine: 'line-through', color: '#bbb' },
-  addButton: { backgroundColor: '#2d79f3', borderRadius: 10, position: 'absolute', bottom: 20, right: 20, padding: 10 },
+  addButton: { backgroundColor: '#2d79f3', borderRadius: 10, position: 'absolute', bottom: 20, right: 0, padding: 10 },
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
   taskInputContainer: { backgroundColor: '#333', padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
   input: { backgroundColor: '#444', color: '#fff', borderRadius: 8, padding: 10, marginBottom: 10 },

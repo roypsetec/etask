@@ -3,7 +3,7 @@ import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'reac
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase/firebaseConfig'; // Ajuste conforme necessário
+import { auth } from '../firebase/firebaseConfig';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -16,13 +16,10 @@ const LoginScreen = () => {
       Alert.alert('Erro', 'Preencha todos os campos');
       return;
     }
-    
-    // Desativando autenticação temporariamente
-    
-    
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate('HomeTabs'); // Redireciona para a tela de tarefas após login
+      navigation.navigate('HomeTabs');
     } catch (error) {
       Alert.alert('Erro', error.message);
     }

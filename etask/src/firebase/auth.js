@@ -6,11 +6,11 @@ import {
   createUserWithEmailAndPassword, 
   signOut 
 } from "firebase/auth";
-import { app } from "./firebaseConfig"; // Importando o app
+import { app } from "./firebaseConfig";
 
-const auth = getAuth(app); // Inicializando autenticação com Firebase App
+const auth = getAuth(app); 
 
-// Função para login com email e senha
+
 export const loginWithEmail = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -20,7 +20,6 @@ export const loginWithEmail = async (email, password) => {
   }
 };
 
-// Função para cadastro com email e senha
 export const signUpWithEmail = async (email, password) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -30,7 +29,6 @@ export const signUpWithEmail = async (email, password) => {
   }
 };
 
-// Função para logout
 export const logout = async () => {
   try {
     await signOut(auth);
@@ -39,5 +37,4 @@ export const logout = async () => {
   }
 };
 
-// Exportando instância do auth
 export { auth };

@@ -180,7 +180,7 @@ const EmBreveScreen = () => {
   const handleDiscardTask = async () => {
     if (completedTask) {
         try {
-        // Recria a tarefa no Firestore
+
         await addDoc(collection(db, 'tarefas'), {
           title: completedTask.title,
           deadline: completedTask.deadline,
@@ -190,8 +190,8 @@ const EmBreveScreen = () => {
           description: completedTask.description,
         });
 
-        fetchTasks(); // Atualiza a lista de tarefas
-        setCompletedTask(null); // Some com a mensagem de conclusão
+        fetchTasks();
+        setCompletedTask(null);
         ToastAndroid.show('Tarefa restaurada com sucesso!', ToastAndroid.SHORT);
       } catch (error) {
         console.error('Erro ao restaurar tarefa:', error);

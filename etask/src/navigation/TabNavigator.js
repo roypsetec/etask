@@ -1,4 +1,4 @@
-// src/navigation/TabNavigator.js
+//TabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HojeScreen from '../screens/HojeScreen';
@@ -14,12 +14,12 @@ const TabNavigator = () => {
       initialRouteName="Hoje"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2d79f3', // Cor para ícone ativo
-        tabBarInactiveTintColor: '#aaa',   // Cor para ícone inativo
+        tabBarActiveTintColor: '#2d79f3',
+        tabBarInactiveTintColor: '#aaa',
         tabBarStyle: {
-          backgroundColor: '#262626', // Fundo da HomeTabs em modo escuro
+          backgroundColor: '#262626',
           borderTopWidth: 0,
-          height: 60, // Aumenta a altura da barra de navegação
+          height: 60,
           paddingBottom: 10,
         },
       }}
