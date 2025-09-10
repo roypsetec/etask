@@ -4,13 +4,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
+import { useAuth } from './useAuth'; // Importa o novo hook
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
+  const { signInWithGoogle, signInWithMicrosoft } = useAuth(); // Usa o hook de autenticação
 
+  // =========================
+  // Login com Email/Senha
+  // =========================
   const handleSignIn = async () => {
     if (!email || !password) {
       Alert.alert('Erro', 'Preencha todos os campos');
@@ -31,6 +36,8 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>E-Task</Text>
+
+      {/* Email */}
       <View style={styles.inputWrapper}>
         <Text style={styles.label}>Email</Text>
         <View style={styles.inputRow}>
@@ -46,6 +53,8 @@ const LoginScreen = () => {
           />
         </View>
       </View>
+
+      {/* Senha */}
       <View style={styles.inputWrapper}>
         <Text style={styles.label}>Senha</Text>
         <View style={styles.inputRow}>
@@ -67,12 +76,34 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Esqueceu senha */}
       <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPassword}>
         <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
       </TouchableOpacity>
+
+      {/* Login com email/senha */}
       <TouchableOpacity style={styles.button} onPress={handleSignIn}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
+
+      {/* Login com Google */}
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: "#db4437" }]}
+        onPress={signInWithGoogle}
+      >
+        <Text style={styles.buttonText}>Entrar com Google</Text>
+      </TouchableOpacity>
+
+      {/* Login com Microsoft */}
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: "#2d79f3" }]}
+        onPress={signInWithMicrosoft}
+      >
+        <Text style={styles.buttonText}>Entrar com Microsoft</Text>
+      </TouchableOpacity>
+
+      {/* Criar conta */}
       <View style={styles.signUpWrapper}>
         <Text style={styles.signUpText}>Não tem uma conta? </Text>
         <TouchableOpacity onPress={handleSignUp}>

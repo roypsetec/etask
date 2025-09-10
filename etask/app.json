@@ -23,6 +23,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "25069fc6-2cea-40d2-a9a0-30eb177d02af"
+      }
+    },
+    "owner": "royps"
   }
 }
