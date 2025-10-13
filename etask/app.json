@@ -2,6 +2,7 @@
   "expo": {
     "name": "etask",
     "slug": "etask",
+    "scheme": "etask",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

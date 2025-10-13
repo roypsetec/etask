@@ -1,8 +1,10 @@
+// src/screens/NavegarScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'; // 1. Importe TouchableOpacity
 import { getAuth } from 'firebase/auth';
 import { Divider } from 'react-native-paper';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native'; // 2. Importe o hook de navegação
 
 export default function App() {
   const [userData, setUserData] = useState({
@@ -10,22 +12,20 @@ export default function App() {
     email: '',
     foto: null,
   });
+  const navigation = useNavigation(); // 3. Obtenha o objeto de navegação
 
   useEffect(() => {
     const auth = getAuth();
     const user = auth.currentUser;
 
     if (user) {
-      // Extrai nome, email e foto
       const nome = user.displayName || '';
       const email = user.email || '';
       const foto = user.photoURL || null;
-
       setUserData({ nome, email, foto });
     }
   }, []);
 
-  // Lógica para decidir o nome a mostrar
   const getNomeParaExibir = () => {
     if (userData.nome) return userData.nome;
     if (userData.email) return userData.email.split('@')[0];
@@ -48,7 +48,13 @@ export default function App() {
           {getNomeParaExibir() ? `Olá, ${getNomeParaExibir()}` : ''}
         </Text>
 
-        <Ionicons name="settings-outline" size={24} color="#ffffff" style={styles.configuração} />
+        {/* 4. Transforme o ícone em um botão */}
+        <TouchableOpacity 
+          style={styles.configuracao}
+          onPress={() => navigation.navigate('Settings')}
+        >
+          <Ionicons name="settings-outline" size={24} color="#ffffff" />
+        </TouchableOpacity>
       </View>
 
       <Divider style={styles.divider} />
@@ -82,9 +88,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginLeft: 10,
     fontWeight: 'bold',
+    flex: 1, // Adicionado para empurrar o ícone para a direita
   },
-  configuração: {
-    paddingLeft: 230,
+  configuracao: {
+    padding: 10, // Aumenta a área de toque
     marginTop: 10,
   },
   divider: {
