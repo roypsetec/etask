@@ -1,4 +1,3 @@
-// src/hooks/useTasks.js
 import { useState, useEffect, useCallback } from 'react';
 import { Alert, ToastAndroid, Keyboard } from 'react-native';
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc, Timestamp, updateDoc } from 'firebase/firestore';
