@@ -1,10 +1,10 @@
 // src/screens/NavegarScreen.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'; // 1. Importe TouchableOpacity
+import React, { useState, useCallback } from 'react'; // 1. Importar useCallback
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { Divider } from 'react-native-paper';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native'; // 2. Importe o hook de navegação
+import { useNavigation, useFocusEffect } from '@react-navigation/native'; // 2. Importar useFocusEffect
 
 export default function App() {
   const [userData, setUserData] = useState({
@@ -12,19 +12,32 @@ export default function App() {
     email: '',
     foto: null,
   });
-  const navigation = useNavigation(); // 3. Obtenha o objeto de navegação
+  const navigation = useNavigation();
 
-  useEffect(() => {
+  // 3. Esta função busca os dados mais recentes do usuário
+  const loadUserData = () => {
     const auth = getAuth();
     const user = auth.currentUser;
 
     if (user) {
-      const nome = user.displayName || '';
-      const email = user.email || '';
-      const foto = user.photoURL || null;
-      setUserData({ nome, email, foto });
+      // Forçamos a releitura dos dados do perfil, caso tenham sido atualizados
+      user.reload().then(() => {
+        const refreshedUser = auth.currentUser; // Pega o usuário atualizado
+        const nome = refreshedUser.displayName || '';
+        const email = refreshedUser.email || '';
+        const foto = refreshedUser.photoURL || null;
+        setUserData({ nome, email, foto });
+      });
     }
-  }, []);
+  };
+
+  // 4. Usar useFocusEffect em vez de useEffect
+  // Isso executa a função toda vez que a tela 'Navegar' entra em foco
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData();
+    }, [])
+  );
 
   const getNomeParaExibir = () => {
     if (userData.nome) return userData.nome;
@@ -48,7 +61,6 @@ export default function App() {
           {getNomeParaExibir() ? `Olá, ${getNomeParaExibir()}` : ''}
         </Text>
 
-        {/* 4. Transforme o ícone em um botão */}
         <TouchableOpacity 
           style={styles.configuracao}
           onPress={() => navigation.navigate('Settings')}
@@ -88,10 +100,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginLeft: 10,
     fontWeight: 'bold',
-    flex: 1, // Adicionado para empurrar o ícone para a direita
+    flex: 1, 
   },
   configuracao: {
-    padding: 10, // Aumenta a área de toque
+    padding: 10, 
     marginTop: 10,
   },
   divider: {

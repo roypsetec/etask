@@ -6,7 +6,8 @@ import SignupScreen from './src/screens/SignupScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeTabs from './src/navigation/TabNavigator';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
-import SettingsScreen from './src/screens/SettingsScreen'; // 1. Importe a nova tela
+import SettingsScreen from './src/screens/SettingsScreen';
+import EditProfileScreen from './src/screens/EditProfileScreen'; // 1. Importe a nova tela
 import { auth } from './src/firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { StatusBar } from 'react-native';
@@ -43,8 +44,11 @@ export default function App() {
           <Stack.Screen name="Signup" component={SignupScreen} options={{ title: 'Cadastro' }} />
           <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Recuperar Senha' }} />
-          {/* 2. Adicione a rota para a tela de configurações */}
           <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Configurações' }} />
+          
+          {/* 2. Adicione a rota para a tela de Edição de Perfil */}
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Editar Perfil' }} />
+        
         </Stack.Navigator>
       </NavigationContainer>
     </>

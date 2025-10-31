@@ -7,23 +7,23 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   Alert, 
-  ScrollView, // 1. Usar ScrollView para mais opções
-  ActivityIndicator // 2. Para feedback visual
+  ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-// 3. Importar as funções de auth necessárias
 import { signOut, sendPasswordResetEmail, deleteUser } from 'firebase/auth'; 
 import { auth } from '../firebase/firebaseConfig';
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(false); // 4. Estado de loading
+  const [loading, setLoading] = useState(false); 
 
+  // ... (funções handleLogout, handlePasswordReset, handleDeleteAccount permanecem iguais) ...
+  // (Colei elas aqui para garantir, mas não mudei nada nelas)
   const handleLogout = async () => {
     setLoading(true);
     try {
       await signOut(auth);
-      // Reseta a navegação para a tela de Login
       navigation.reset({
         index: 0,
         routes: [{ name: 'Login' }],
@@ -35,7 +35,6 @@ const SettingsScreen = () => {
     }
   };
 
-  // 5. NOVA FUNÇÃO: Redefinir Senha
   const handlePasswordReset = () => {
     const user = auth.currentUser;
     if (!user || !user.email) {
@@ -57,7 +56,6 @@ const SettingsScreen = () => {
       .finally(() => setLoading(false));
   };
 
-  // 6. NOVA FUNÇÃO: Excluir Conta
   const handleDeleteAccount = () => {
     const user = auth.currentUser;
     if (!user) {
@@ -65,7 +63,6 @@ const SettingsScreen = () => {
       return;
     }
 
-    // 6a. Pedir confirmação é crucial
     Alert.alert(
       'Excluir conta?',
       'Tem certeza que deseja excluir sua conta permanentemente? Esta ação não pode ser desfeita. Você precisará fazer login novamente para confirmar.',
@@ -77,17 +74,14 @@ const SettingsScreen = () => {
           onPress: async () => {
             setLoading(true);
             try {
-              // 6b. Tenta excluir o usuário
               await deleteUser(user);
               Alert.alert('Sucesso', 'Sua conta foi excluída.');
-              // 6c. Desloga e volta para o Login
               navigation.reset({
                 index: 0,
                 routes: [{ name: 'Login' }],
               });
             } catch (error) {
               setLoading(false);
-              // 6d. Trata o erro comum de segurança
               if (error.code === 'auth/requires-recent-login') {
                 Alert.alert(
                   'Ação Requer Autenticação',
@@ -110,16 +104,21 @@ const SettingsScreen = () => {
 
 
   return (
-    // 7. Trocar View por ScrollView
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.title}>Configurações</Text>
       
       {loading ? (
-        // 8. Mostrar indicador de atividade
         <ActivityIndicator size="large" color="#fff" style={{ marginVertical: 20 }} />
       ) : (
         <>
-          {/* 9. Botão de Redefinir Senha */}
+          {/* 1. NOVO BOTÃO DE EDITAR PERFIL */}
+          <TouchableOpacity 
+            style={[styles.button, styles.buttonPrimary]} 
+            onPress={() => navigation.navigate('EditProfile')}
+          >
+            <Text style={styles.buttonText}>Editar Perfil</Text>
+          </TouchableOpacity>
+        
           <TouchableOpacity 
             style={[styles.button, styles.buttonPrimary]} 
             onPress={handlePasswordReset}
@@ -127,7 +126,6 @@ const SettingsScreen = () => {
             <Text style={styles.buttonText}>Redefinir Senha</Text>
           </TouchableOpacity>
 
-          {/* Botão Sair */}
           <TouchableOpacity 
             style={[styles.button, styles.buttonSecondary]} 
             onPress={handleLogout}
@@ -135,7 +133,6 @@ const SettingsScreen = () => {
             <Text style={styles.buttonText}>Sair</Text>
           </TouchableOpacity>
 
-          {/* 10. Botão de Excluir Conta */}
           <TouchableOpacity 
             style={[styles.button, styles.buttonDelete]} 
             onPress={handleDeleteAccount}
@@ -155,7 +152,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#212121',
   },
-  // 11. Novo estilo para o conteúdo do ScrollView
   contentContainer: {
     padding: 20,
   },
@@ -169,18 +165,17 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 15, // Espaçamento entre os botões
+    marginTop: 15, 
   },
-  // 12. Estilos específicos para os botões
   buttonPrimary: {
-    backgroundColor: '#2d79f3', // Azul (cor primária do app)
+    backgroundColor: '#2d79f3', 
   },
   buttonSecondary: {
-    backgroundColor: '#424242', // Cinza (neutro)
+    backgroundColor: '#424242',
   },
   buttonDelete: {
-    backgroundColor: '#f44336', // Vermelho (perigo)
-    marginTop: 30, // Mais espaço antes da ação destrutiva
+    backgroundColor: '#f44336', 
+    marginTop: 30, 
   },
   buttonText: {
     color: '#fff',
