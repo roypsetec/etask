@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#212121',
     alignItems: 'center',
+    paddingTop: 20
   },
   acessibilidade: {
     backgroundColor: '#262626',
