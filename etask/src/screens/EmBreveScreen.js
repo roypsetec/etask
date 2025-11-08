@@ -21,9 +21,12 @@ const EmBreveScreen = () => {
 
   // 2. Criamos a função de intervalo de data que depende do estado `selectedDate`
   const getDateRange = useCallback(() => {
-    const start = new Date(selectedDate);
+    const [year, month, day] = selectedDate.split('-').map(Number);
+
+    const start = new Date(year, month - 1, day);
     start.setHours(0, 0, 0, 0);
-    const end = new Date(selectedDate);
+
+    const end = new Date(year, month - 1, day);
     end.setHours(23, 59, 59, 999);
     return { start, end };
   }, [selectedDate]);

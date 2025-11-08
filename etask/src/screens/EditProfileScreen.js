@@ -1,5 +1,5 @@
 // src/screens/EditProfileScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,17 +9,15 @@ import {
   Alert,
   Image,
   ActivityIndicator,
-  Platform,
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { updateProfile } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker'; // Agora vai ser encontrado (Passo 1)
 import { auth, storage } from '../firebase/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 
-// Imagem de perfil padrão
 const defaultProfile = require('../../assets/default-profile.png');
 
 const EditProfileScreen = () => {
@@ -27,63 +25,63 @@ const EditProfileScreen = () => {
   const user = auth.currentUser;
 
   const [nome, setNome] = useState(user?.displayName || '');
-  const [imageUri, setImageUri] = useState(user?.photoURL || null); // URL da web ou URI local
+  const [imageUri, setImageUri] = useState(user?.photoURL || null);
   const [loading, setLoading] = useState(false);
 
-  // Função para pedir permissão e escolher imagem
   const pickImage = async () => {
-    // Pedir permissão para acessar a galeria
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      Alert.alert('Permissão necessária', 'É preciso permitir o acesso à galeria para trocar a foto.');
-      return;
-    }
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permissionResult.granted === false) {
+        Alert.alert('Permissão necessária', 'É preciso permitir o acesso à galeria.');
+        return;
+      }
 
-    // Abrir a galeria
-    const pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
+      const pickerResult = await ImagePicker.launchImageLibraryAsync({
+        // =======================================================
+        // CORREÇÃO 1: A API espera uma string
+        // =======================================================
+        mediaTypes: 'Images',
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
 
-    if (!pickerResult.canceled) {
-      setImageUri(pickerResult.assets[0].uri); // Seta a URI local da imagem selecionada
+      if (!pickerResult.canceled) {
+        setImageUri(pickerResult.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Erro ao abrir o seletor de imagens:", error);
+      Alert.alert("Erro", "Não foi possível abrir a galeria.");
     }
   };
 
-  // Função para fazer upload da imagem e retornar a URL
   const uploadImageAsync = async (uri) => {
     if (!user) return null;
 
-    // Converte a URI da imagem (local) para um blob
     const response = await fetch(uri);
     const blob = await response.blob();
 
-    // Cria uma referência no Storage (ex: 'profile-images/USER_ID.jpg')
-    const storageRef = ref(storage, `profile-images/${user.uid}`);
-    
-    // Faz o upload
-    await uploadBytes(storageRef, blob);
+    // =======================================================
+    // CORREÇÃO 2: Caminho IDÊNTICO ao da sua Regra (Passo 2)
+    // (com "profile_images" e um nome de arquivo)
+    // =======================================================
+    const storageRef = ref(storage, `profile_images/${user.uid}/profile.jpg`);
 
-    // Retorna a URL de download
+    await uploadBytes(storageRef, blob);
     return await getDownloadURL(storageRef);
   };
 
-  // Função para salvar as alterações
   const handleSave = async () => {
     if (!user) return;
     setLoading(true);
 
     try {
-      let newPhotoURL = user.photoURL; // Começa com a URL existente
+      let newPhotoURL = user.photoURL;
 
-      // 1. Se a imageUri mudou E não é uma URL http (ou seja, é uma uri local 'file://')
       if (imageUri && imageUri !== user.photoURL && !imageUri.startsWith('http')) {
         newPhotoURL = await uploadImageAsync(imageUri);
       }
 
-      // 2. Prepara os dados para atualizar o perfil
       const updates = {};
       if (nome !== user.displayName) {
         updates.displayName = nome;
@@ -92,7 +90,6 @@ const EditProfileScreen = () => {
         updates.photoURL = newPhotoURL;
       }
 
-      // 3. Atualiza o perfil se houver mudanças
       if (Object.keys(updates).length > 0) {
         await updateProfile(user, updates);
         Alert.alert('Sucesso', 'Perfil atualizado!');
@@ -102,6 +99,7 @@ const EditProfileScreen = () => {
       }
 
     } catch (error) {
+      // O erro (storage/unknown) NÃO DEVE mais acontecer
       console.error("Erro ao salvar perfil: ", error);
       Alert.alert('Erro', 'Não foi possível atualizar o perfil.');
     } finally {
