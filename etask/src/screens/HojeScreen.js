@@ -23,7 +23,6 @@ const HojeScreen = () => {
     taskDescription,
     taskDeadline,
     showDatePicker,
-    // NOVO (Passo 1): Pegar as novas propriedades do hook
     lastCompletedTask,
     handleUndoCompletion,
     openModal,
@@ -74,10 +73,13 @@ const HojeScreen = () => {
         )}
       />
 
-      {/* NOVO (Passo 2): Adicionar o componente visual da mensagem */}
+      {/* --- NOVA MENSAGEM DE CONCLUSÃO --- */}
       {lastCompletedTask && (
         <View style={styles.completedMessage}>
-          <Text style={styles.completedMessageText}>Tarefa "{lastCompletedTask.title}" concluída!</Text>
+          <View style={styles.messageLeft}>
+             <Ionicons name="checkmark-circle" size={20} color="#4caf50" style={{ marginRight: 8 }} />
+             <Text style={styles.completedMessageText}>Concluído</Text>
+          </View>
           <TouchableOpacity onPress={handleUndoCompletion} style={styles.undoButton}>
             <Text style={styles.undoButtonText}>Desfazer</Text>
           </TouchableOpacity>
@@ -88,8 +90,8 @@ const HojeScreen = () => {
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
 
+      {/* Modal de Tarefas */}
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={closeModal}>
-        {/* ... (O conteúdo do Modal continua o mesmo) ... */}
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.modalOverlay}>
                 <View style={styles.taskInputContainer}>
@@ -162,32 +164,45 @@ const styles = StyleSheet.create({
   cancelButtonText: { color: '#fff', fontSize: 16 },
   loader: { flex: 1, justifyContent: 'center', backgroundColor: '#212121' },
 
-  // NOVO (Passo 3): Adicionar os novos estilos no final
+  // --- ESTILOS ATUALIZADOS DA MENSAGEM ---
   completedMessage: { 
-    backgroundColor: '#444', 
+    backgroundColor: '#333', // Fundo um pouco mais claro que o app
     padding: 15, 
     position: 'absolute', 
-    bottom: 80, 
+    bottom: 90, // Acima da tab bar
     left: 20, 
     right: 20, 
-    borderRadius: 10, 
+    borderRadius: 8, 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    alignItems: 'center'
+    alignItems: 'center',
+    elevation: 5, // Sombra no Android
+    shadowColor: "#000", // Sombra no iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50' // Detalhe verde lateral
+  },
+  messageLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   completedMessageText: { 
     color: '#fff', 
-    fontSize: 16 
+    fontSize: 16,
+    fontWeight: 'bold'
   },
   undoButton: { 
-    backgroundColor: '#2d79f3', 
+    // Removido o fundo para ficar apenas texto, ou pode manter um fundo sutil
     paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 5 
   },
   undoButtonText: { 
-    color: '#fff', 
-    fontSize: 16 
+    color: '#2d79f3', // Azul de destaque
+    fontSize: 16,
+    fontWeight: 'bold',
+    textTransform: 'uppercase'
   },
 });
 

@@ -1,6 +1,8 @@
-//TabNavigator.js
+// src/navigation/TabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+// 1. IMPORTAR O HOOK DE INSETS
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; 
 import HojeScreen from '../screens/HojeScreen';
 import EmBreveScreen from '../screens/EmBreveScreen';
 import NavegarScreen from '../screens/NavegarScreen';
@@ -9,6 +11,9 @@ import { Ionicons } from '@expo/vector-icons';
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
+  // 2. PEGAR AS MEDIDAS SEGURAS
+  const insets = useSafeAreaInsets(); 
+
   return (
     <Tab.Navigator
       initialRouteName="Hoje"
@@ -19,8 +24,12 @@ const TabNavigator = () => {
         tabBarStyle: {
           backgroundColor: '#262626',
           borderTopWidth: 0,
-          height: 60,
-          paddingBottom: 10,
+          // 3. CALCULAR ALTURA E PADDING DINAMICAMENTE
+          // A altura base é 60, somamos o que o sistema precisar na parte de baixo
+          height: 60 + insets.bottom, 
+          // O padding base é 10, somamos a área do sistema
+          paddingBottom: 10 + insets.bottom, 
+          paddingTop: 10, // Adicionei um pouco de padding no topo para centralizar os ícones
         },
       }}
     >

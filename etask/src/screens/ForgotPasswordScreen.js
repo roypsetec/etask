@@ -1,5 +1,3 @@
-//ForgotPasswordScreen.js
-
 import React, { useState } from 'react';
 import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,17 +29,24 @@ const ForgotPasswordScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Recuperar Senha</Text>
-      <Text style={styles.impactPhrase}>
-        Não deixe nada te parar. Recupere seu acesso e siga em frente!
+      {/* Ícone de Destaque */}
+      <View style={styles.iconContainer}>
+        <Ionicons name="lock-open-outline" size={80} color="#2d79f3" />
+      </View>
+
+      <Text style={styles.title}>Esqueceu a senha?</Text>
+      <Text style={styles.subtitle}>
+        Não se preocupe! Digite seu e-mail abaixo e enviaremos as instruções para recuperação.
       </Text>
+
+      {/* Input de Email */}
       <View style={styles.inputWrapper}>
         <Text style={styles.label}>Email</Text>
         <View style={styles.inputRow}>
           <Ionicons name="mail-outline" size={20} color="#fff" />
           <TextInput
             style={styles.textInput}
-            placeholder="Digite seu e-mail"
+            placeholder="Digite seu e-mail cadastrado"
             placeholderTextColor="#aaa"
             value={email}
             onChangeText={setEmail}
@@ -50,8 +55,10 @@ const ForgotPasswordScreen = () => {
           />
         </View>
       </View>
+
+      {/* Botão Principal */}
       <TouchableOpacity style={styles.button} onPress={handlePasswordReset}>
-        <Text style={styles.buttonText}>Enviar E-mail de Recuperação</Text>
+        <Text style={styles.buttonText}>Enviar Link de Recuperação</Text>
       </TouchableOpacity>
     </View>
   );
@@ -63,51 +70,65 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#212121',
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    justifyContent: 'center', 
+    alignItems: 'center',
+  },
+  iconContainer: {
+    marginBottom: 20,
+    backgroundColor: 'rgba(45, 121, 243, 0.1)', // Fundo azul bem clarinho/transparente
+    padding: 20,
+    borderRadius: 50,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 10,
-  },
-  impactPhrase: {
-    fontSize: 16,
-    color: '#fff',
     textAlign: 'center',
-    marginBottom: 20,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#aaa',
+    textAlign: 'center',
+    marginBottom: 30,
+    lineHeight: 22,
+    paddingHorizontal: 10,
   },
   inputWrapper: {
     width: '100%',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   label: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 5,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#333',
-    borderRadius: 10,
-    padding: 10,
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   textInput: {
     flex: 1,
     color: '#fff',
     marginLeft: 10,
+    fontSize: 16,
   },
   button: {
     width: '100%',
-    backgroundColor: '#151717',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#2d79f3',
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 10,
+    marginBottom: 20,
   },
   buttonText: {
     color: '#fff',

@@ -4,9 +4,8 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, TextInput, A
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
-import { useTasks } from '../hooks/useTasks'; // 1. Importar o hook
+import { useTasks } from '../hooks/useTasks';
 
-// Configuração de localidade do calendário (pode ficar fora do componente)
 LocaleConfig.locales['pt-br'] = {
   monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
   monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
@@ -19,13 +18,10 @@ LocaleConfig.defaultLocale = 'pt-br';
 const EmBreveScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // 2. Criamos a função de intervalo de data que depende do estado `selectedDate`
   const getDateRange = useCallback(() => {
     const [year, month, day] = selectedDate.split('-').map(Number);
-
     const start = new Date(year, month - 1, day);
     start.setHours(0, 0, 0, 0);
-
     const end = new Date(year, month - 1, day);
     end.setHours(23, 59, 59, 999);
     return { start, end };
@@ -40,7 +36,7 @@ const EmBreveScreen = () => {
     taskDescription,
     taskDeadline,
     showDatePicker,
-    fetchTasks, // Precisamos do fetchTasks para atualizar ao mudar a data
+    fetchTasks,
     lastCompletedTask,
     handleUndoCompletion,
     openModal,
@@ -54,7 +50,6 @@ const EmBreveScreen = () => {
     setShowDatePicker,
   } = useTasks(getDateRange);
 
-  // 3. Usamos useEffect para chamar fetchTasks sempre que a data selecionada mudar
   useEffect(() => {
     fetchTasks();
   }, [selectedDate, fetchTasks]);
@@ -112,9 +107,13 @@ const EmBreveScreen = () => {
         />
       )}
 
+      {/* --- NOVA MENSAGEM DE CONCLUSÃO --- */}
       {lastCompletedTask && (
         <View style={styles.completedMessage}>
-          <Text style={styles.completedMessageText}>Tarefa "{lastCompletedTask.title}" concluída!</Text>
+          <View style={styles.messageLeft}>
+             <Ionicons name="checkmark-circle" size={20} color="#4caf50" style={{ marginRight: 8 }} />
+             <Text style={styles.completedMessageText}>Concluído</Text>
+          </View>
           <TouchableOpacity onPress={handleUndoCompletion} style={styles.undoButton}>
             <Text style={styles.undoButtonText}>Desfazer</Text>
           </TouchableOpacity>
@@ -125,7 +124,6 @@ const EmBreveScreen = () => {
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
 
-      {/* O Modal é idêntico ao da HojeScreen */}
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={closeModal}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalOverlay}>
@@ -178,9 +176,7 @@ const EmBreveScreen = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
-  // Copie os estilos da EmBreveScreen.js e adicione o 'loader' se precisar
   container: { flex: 1, backgroundColor: '#212121', paddingHorizontal: 20, paddingTop: 40 },
   screenTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 20 },
   noTasksText: { textAlign: 'center', color: '#ccc', marginTop: 20 },
@@ -199,32 +195,46 @@ const styles = StyleSheet.create({
   sendButton: { backgroundColor: '#2d79f3', padding: 12, borderRadius: 10, alignItems: 'center', flex: 1, marginLeft: 5 },
   cancelButton: { backgroundColor: '#f44336', padding: 12, borderRadius: 10, alignItems: 'center', flex: 1, marginRight: 5 },
   cancelButtonText: { color: '#fff', fontSize: 16 },
-
-  completedMessage: {
-    backgroundColor: '#444',
-    padding: 15,
-    position: 'absolute',
-    bottom: 80,
-    left: 20,
-    right: 20,
-    borderRadius: 10,
+  
+  // --- ESTILOS DA MENSAGEM ---
+  completedMessage: { 
+    backgroundColor: '#333',
+    padding: 15, 
+    position: 'absolute', 
+    bottom: 90, 
+    left: 20, 
+    right: 20, 
+    borderRadius: 8, 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50'
+  },
+  messageLeft: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
-  completedMessageText: {
-    color: '#fff',
-    fontSize: 16
+  completedMessageText: { 
+    color: '#fff', 
+    fontSize: 16,
+    fontWeight: 'bold'
   },
-  undoButton: {
-    backgroundColor: '#2d79f3',
+  undoButton: { 
     paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 5
   },
-  undoButtonText: {
-    color: '#fff',
-    fontSize: 16
+  undoButtonText: { 
+    color: '#2d79f3',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textTransform: 'uppercase'
   },
 });
+
 export default EmBreveScreen;
